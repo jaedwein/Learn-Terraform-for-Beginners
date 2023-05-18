@@ -10,3 +10,14 @@ resource "aws_vpc" "mtc_vpc" {
     Name = "Dev"
   }
 }
+
+resource "aws_subnet" "mtc_public_subnet" {
+    vpc_id = aws_vpc.mtc_vpc.id
+    cidr_block = "10.128.1.0/24"
+    map_public_ip_on_launch = true
+    availability_zone = "us-east-1c"
+
+    tags = {
+      Name = "dev-public-subnet"
+    }
+}
