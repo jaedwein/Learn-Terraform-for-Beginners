@@ -13,3 +13,8 @@ provider "aws" {
   shared_credentials_files = ["~/.aws/credentials"]
   profile                  = "soac02-general-jaedwein"
 }
+
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.mtc_public_subnet.id
+  route_table_id = aws_route_table.mtc_public_rt.id
+}
