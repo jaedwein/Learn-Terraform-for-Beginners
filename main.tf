@@ -57,7 +57,7 @@ resource "aws_security_group" "mtc_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["45.179.72.35/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -76,12 +76,22 @@ resource "aws_key_pair" "mtc_auth" {
 }
 
 resource "aws_instance" "dev_node" {
-  instance_type = "t2.micro"
-  ami           = data.aws_ami.server_ami.id
-  key_name = aws_key_pair.mtc_auth.id
+  instance_type          = "t2.micro"
+  ami                    = data.aws_ami.server_ami.id
+  key_name               = aws_key_pair.mtc_auth.id
   vpc_security_group_ids = [aws_security_group.mtc_sg.id]
-  subnet_id = aws_subnet.mtc_public_subnet.id
+  subnet_id              = aws_subnet.mtc_public_subnet.id
+  user_data              = file("userdata.tpl")
+
   tags = {
     Name = "dev_node"
+  }
+  provisioner "local-exec" {
+    command = templatefile("${var.host_os}-ssh-config.tpl", {
+      hostname     = self.public_ip,
+      user         = "ubuntu",
+      identityfile = "~/.ssh/id_ed25519"
+    })
+    interpreter = var.host_os == "windows" ? [ "Powershell", "-Command" ] : ["bash","-c"]
   }
 }
